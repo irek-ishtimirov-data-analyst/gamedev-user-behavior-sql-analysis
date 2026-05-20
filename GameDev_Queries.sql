@@ -49,7 +49,7 @@ from skygame.game_sessions
 --------------------------------------------------------------------------------------------------------------------------------
 --количество игровых сессий, сессий дольше 5 минут и доля сессий дольше 5 минут в разрезе по месяцам.
 select date_trunc('month', start_session) as month_sessions
-	 , count(*) as cnt_sessions_all
+     , count(*) as cnt_sessions_all
      , sum(case when end_session - start_session > interval '5 minute' then 1 else 0 end) as cnt_sessions_longer_five_minutes
      , sum(case when end_session - start_session > interval '5 minute' then 1 else 0 :: float end) / count(*) as share_sessions_longer_five_minutes
 from skygame.game_sessions
@@ -117,7 +117,7 @@ select * from skygame.item_list
 --Динамика пользовательских оплат по месяцам в разрезе по типам продукта.
 select    date_trunc('month',dtime_pay) as month_pay
         , type
-	    , sum(cnt_buy * price) as revenue
+	, sum(cnt_buy * price) as revenue
 from skygame.monetary m
    join skygame.item_list i
       on m.id_item_buy = i.id_item
@@ -134,7 +134,7 @@ order by type
 --Среднее количество приобретаемых кристаллов на одну покупку и выручка, после повышения цены за 1 кристалл.
 select    date_trunc('month',dtime_pay) as month_pay
         , avg(cnt_buy) as avg_cnt_buy
-	    , sum(cnt_buy * price) as revenue
+	, sum(cnt_buy * price) as revenue
 from skygame.monetary m
    join skygame.item_list i
       on m.id_item_buy = i.id_item
@@ -159,14 +159,15 @@ with K_f as
 
 month_coh as
 ( select date_trunc ('month', reg_date ) as month_cohort
-      , count (id_user) as cnt_users
+       , count (id_user) as cnt_users
  from skygame.users      
  group by month_cohort
  order by month_cohort
 )
 
-select avg (cnt_users) * (select K_factor from K_f ) as V_cohort
-from month_coh
+select round(avg(cnt_users) * (select K_factor from K_f)) as viral_growth_users
+     , (select K_factor from K_f)
+	from month_coh
 
 --------------------------------------------------------------------------------------------------------------------------------
 -- Расчет динамики активных лояльных пользователей по месяцам (LMAU):
